@@ -4,7 +4,7 @@
 **Case study:** NaijaMart, a simulated Nigerian online marketplace where independent sellers list products and customers buy them
 **Database:** PostgreSQL, database name `ecommerce`, 11 tables
 
-This folder holds everything for Portfolio 1: the case study, the ER diagram, the relational schema with its keys and constraints, a test script that tries to break those constraints, and the normalisation write-up.
+This folder holds everything for Portfolio 1: the case study, the ER diagram, the relational schema with its keys and constraints, a test script that tries to break those constraints, and the normalization write-up.
 
 Part of this folder was generated with an AI tool (Claude) and then run and checked by me. The full declaration is in [`../AI-USE.md`](../AI-USE.md).
 
@@ -96,8 +96,8 @@ The diagram cannot draw CHECK constraints, so those are only in `schema.sql` and
 
 ## 4. Key design choices and what I would do differently
 
-**Key design choices.** Each product belongs to exactly one seller, and composite foreign keys make the database itself reject an order item whose seller disagrees with its product or its delivery, so that rule does not depend on application code. A few values are kept on purpose even though normalisation says to avoid them: `unit_price` and `commission_rate` on `order_items` are frozen snapshots so old orders never change, while `total_amount` and `wallet_balance` are derived values kept for speed, with the wallet history stored as a ledger. I used `CHECK` constraints instead of enum types because the status lists may grow and a CHECK is easy to change, and I left out speed indexes on purpose so the before and after query plans in Portfolio 2 are a fair comparison.
+**Key design choices.** Each product belongs to exactly one seller, and composite foreign keys make the database itself reject an order item whose seller disagrees with its product or its delivery, so that rule does not depend on application code. A few values are kept on purpose even though normalization says to avoid them: `unit_price` and `commission_rate` on `order_items` are frozen snapshots so old orders never change, while `total_amount` and `wallet_balance` are derived values kept for speed, with the wallet history stored as a ledger. I used `CHECK` constraints instead of enum types because the status lists may grow and a CHECK is easy to change, and I left out speed indexes on purpose so the before and after query plans in Portfolio 2 are a fair comparison.
 
 **What I would do differently.** I would close a gap I found late: an order can currently point at an address that belongs to another customer, which needs one more composite key on `addresses`. I would also protect `total_amount` and `wallet_balance` inside the database, for example with a trigger, because right now they stay correct only through transaction code and an audit query. Finally, I would write the constraint tests alongside each table instead of after the whole schema, so every rule is proven as soon as it is added.
 
-Full detail on the normalisation reasoning is in [`normalization.md`](normalization.md).
+Full detail on the normalization reasoning is in [`normalization.md`](normalization.md).
