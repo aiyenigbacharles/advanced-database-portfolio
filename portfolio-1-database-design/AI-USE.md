@@ -2,8 +2,8 @@
 
 **Course:** MIT 8103 Advanced Database Systems, First Semester Continuous Assessment 2026/2027
 **Student:** Charles Aiyenigba
-**Student ID:** [add your student ID]
-**Date:** [add date of submission]
+**Student ID:** 301911426
+**Date:** [TBA]
 
 This declaration follows section 11 of the assessment brief: the AI tool used, what it was used for, and how the output was reviewed, corrected, tested or verified by me.
 
@@ -21,8 +21,6 @@ This declaration follows section 11 of the assessment brief: the AI tool used, w
 | `constraint_tests.sql` | 1 | The test script: good fixture data and 44 failing statements, one per rule |
 | `er-diagram.dbml` | 1 | The diagram source for dbdiagram.io |
 | `case-study.md` | 1 | The written description of the NaijaMart case study |
-| `normalisation.md` and `normalisation-notes.md` | 1 | The written normalisation walkthrough and the notes on deliberate denormalisation |
-| `AI-USE.md` | all | A draft of this declaration |
 
 The AI also discussed design choices with me in conversation, for example where stock lives, how the wallet ledger works, and how split orders become deliveries.
 
@@ -51,7 +49,3 @@ The AI also discussed design choices with me in conversation, for example where 
 ## 5. Responsibility
 
 I am responsible for the accuracy, originality and understanding of everything in this portfolio, and I can explain every file listed above.
-
-## 6. Other resources
-
-Sources, datasets, libraries and documentation used besides the AI tool: [list them, for example "PostgreSQL documentation", "course materials MIT8103 SS1 to SS4"].
