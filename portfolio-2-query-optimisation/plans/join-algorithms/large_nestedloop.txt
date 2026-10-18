@@ -1,0 +1,24 @@
+J2: item revenue for every order in the last 90 days (a LARGE join: about 52,000 orders) - forced Nested Loop
+
+SELECT COUNT(*) AS items, SUM(oi.unit_price * oi.quantity) AS revenue
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.order_id
+WHERE o.order_date >= TIMESTAMPTZ '2026-10-15' - INTERVAL '90 days';
+
+All 3 runs (ms): 211.419, 161.212, 127.009
+Median execution time: 161.212 ms
+
+Aggregate  (cost=40624.34..40624.35 rows=1 width=40) (actual time=161.177..161.179 rows=1 loops=1)
+  Buffers: shared hit=208861
+  ->  Nested Loop  (cost=0.42..39331.14 rows=129320 width=10) (actual time=0.351..126.561 rows=129059 loops=1)
+        Buffers: shared hit=208861
+        ->  Seq Scan on orders o  (cost=0.00..3254.00 rows=51656 width=4) (actual time=0.336..21.604 rows=51637 loops=1)
+              Filter: (order_date >= ('2026-10-15 00:00:00+00'::timestamp with time zone - '90 days'::interval))
+              Rows Removed by Filter: 48363
+              Buffers: shared hit=1754
+        ->  Index Scan using uq_order_items_order_product on order_items oi  (cost=0.42..0.67 rows=3 width=14) (actual time=0.001..0.002 rows=2 loops=51637)
+              Index Cond: (order_id = o.order_id)
+              Buffers: shared hit=207107
+Planning Time: 0.199 ms
+Execution Time: 161.212 ms
+

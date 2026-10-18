@@ -1,0 +1,17 @@
+Rewrite 1, BAD: cast on the column
+
+SELECT COUNT(*), SUM(total_amount) FROM orders
+WHERE order_date::date = DATE '2026-10-10';
+
+All 3 runs (ms): 11.606, 10.293, 10.132
+Median execution time: 10.293 ms
+
+Aggregate  (cost=3256.50..3256.51 rows=1 width=40) (actual time=10.279..10.280 rows=1 loops=1)
+  Buffers: shared hit=1754
+  ->  Seq Scan on orders  (cost=0.00..3254.00 rows=500 width=6) (actual time=0.306..10.157 rows=1013 loops=1)
+        Filter: ((order_date)::date = '2026-10-10'::date)
+        Rows Removed by Filter: 98987
+        Buffers: shared hit=1754
+Planning Time: 0.050 ms
+Execution Time: 10.293 ms
+

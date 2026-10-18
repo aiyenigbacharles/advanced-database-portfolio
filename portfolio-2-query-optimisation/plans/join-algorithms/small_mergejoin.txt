@@ -1,0 +1,31 @@
+J1: one customer's orders with their items (a SMALL join: 28 orders) - forced Merge Join
+
+SELECT o.order_id, o.order_date, oi.product_id, oi.quantity
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.order_id
+WHERE o.customer_id = 10;
+
+All 3 runs (ms): 39.514, 37.302, 36.924
+Median execution time: 37.302 ms
+
+Merge Join  (cost=138.66..11535.65 rows=93 width=20) (actual time=1.528..37.270 rows=82 loops=1)
+  Merge Cond: (oi.order_id = o.order_id)
+  Buffers: shared hit=2397
+  ->  Index Scan using uq_order_items_order_product on order_items oi  (cost=0.42..10770.65 rows=250349 width=12) (actual time=0.004..23.247 rows=234337 loops=1)
+        Buffers: shared hit=2367
+  ->  Sort  (cost=138.01..138.10 rows=37 width=12) (actual time=0.047..0.053 rows=28 loops=1)
+        Sort Key: o.order_id
+        Sort Method: quicksort  Memory: 26kB
+        Buffers: shared hit=30
+        ->  Bitmap Heap Scan on orders o  (cost=4.70..137.05 rows=37 width=12) (actual time=0.015..0.040 rows=28 loops=1)
+              Recheck Cond: (customer_id = 10)
+              Heap Blocks: exact=27
+              Buffers: shared hit=30
+              ->  Bitmap Index Scan on idx_orders_customer_date  (cost=0.00..4.70 rows=37 width=0) (actual time=0.009..0.010 rows=28 loops=1)
+                    Index Cond: (customer_id = 10)
+                    Buffers: shared hit=3
+Planning:
+  Buffers: shared hit=17
+Planning Time: 0.189 ms
+Execution Time: 37.302 ms
+

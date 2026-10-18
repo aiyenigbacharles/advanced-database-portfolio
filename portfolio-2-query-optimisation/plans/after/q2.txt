@@ -1,0 +1,25 @@
+Q2: Find orders that have been PENDING for more than 2 days.
+
+SELECT order_id, customer_id, order_date, total_amount
+FROM orders
+WHERE status = 'PENDING'
+  AND order_date < TIMESTAMPTZ '2026-10-15' - INTERVAL '2 days'
+ORDER BY order_date;
+
+All 3 runs (ms): 2.275, 2.152, 2.810
+Median execution time: 2.275 ms
+
+Sort  (cost=2102.39..2110.71 rows=3330 width=22) (actual time=1.960..2.142 rows=2568 loops=1)
+  Sort Key: order_date
+  Sort Method: quicksort  Memory: 217kB
+  Buffers: shared hit=874 read=9
+  ->  Bitmap Heap Scan on orders  (cost=74.09..1907.56 rows=3330 width=22) (actual time=0.301..1.436 rows=2568 loops=1)
+        Recheck Cond: ((order_date < ('2026-10-15 00:00:00+00'::timestamp with time zone - '2 days'::interval)) AND ((status)::text = 'PENDING'::text))
+        Heap Blocks: exact=874
+        Buffers: shared hit=874 read=9
+        ->  Bitmap Index Scan on idx_orders_pending_date  (cost=0.00..73.26 rows=3330 width=0) (actual time=0.208..0.208 rows=2568 loops=1)
+              Index Cond: (order_date < ('2026-10-15 00:00:00+00'::timestamp with time zone - '2 days'::interval))
+              Buffers: shared read=9
+Planning Time: 0.048 ms
+Execution Time: 2.275 ms
+

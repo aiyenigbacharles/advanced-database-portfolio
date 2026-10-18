@@ -1,0 +1,25 @@
+             name             | kind  |  size   |  bytes   
+------------------------------+-------+---------+----------
+ deliveries                   | table | 22 MB   | 22749184
+ order_items                  | table | 14 MB   | 15081472
+ orders                       | table | 14 MB   | 14368768
+ wallet_transactions          | table | 2280 kB |  2334720
+ uq_order_items_order_product | index | 5512 kB |  5644288
+ order_items_pkey             | index | 5504 kB |  5636096
+ orders_pkey                  | index | 4408 kB |  4513792
+(7 rows)
+
+ extra_indexes | total_size_of_extra_indexes 
+---------------+-----------------------------
+             0 | 0 bytes
+(1 row)
+
+DROP TABLE
+CREATE TABLE
+CREATE TABLE
+DO
+ 3 runs (ms) | median ms 
+-------------+-----------
+ 64, 65, 79  |        65
+(1 row)
+

@@ -1,0 +1,21 @@
+One seller's monthly commission, from the view (a seller dashboard)
+
+SELECT month, commission FROM mv_monthly_commission WHERE seller_id = 33 ORDER BY month;
+
+All 3 runs (ms): 0.045, 0.044, 0.020
+Median execution time: 0.044 ms
+
+Sort  (cost=50.16..50.22 rows=22 width=15) (actual time=0.037..0.038 rows=22 loops=1)
+  Sort Key: month
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=19
+  ->  Bitmap Heap Scan on mv_monthly_commission  (cost=4.46..49.67 rows=22 width=15) (actual time=0.004..0.011 rows=22 loops=1)
+        Recheck Cond: (seller_id = 33)
+        Heap Blocks: exact=17
+        Buffers: shared hit=19
+        ->  Bitmap Index Scan on idx_mv_commission_seller_month  (cost=0.00..4.45 rows=22 width=0) (actual time=0.002..0.002 rows=22 loops=1)
+              Index Cond: (seller_id = 33)
+              Buffers: shared hit=2
+Planning Time: 0.014 ms
+Execution Time: 0.044 ms
+

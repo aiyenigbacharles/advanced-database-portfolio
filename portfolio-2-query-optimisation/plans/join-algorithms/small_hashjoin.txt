@@ -1,0 +1,28 @@
+J1: one customer's orders with their items (a SMALL join: 28 orders) - forced Hash Join
+
+SELECT o.order_id, o.order_date, oi.product_id, oi.quantity
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.order_id
+WHERE o.customer_id = 10;
+
+All 3 runs (ms): 34.101, 31.322, 30.982
+Median execution time: 31.322 ms
+
+Hash Join  (cost=137.51..5139.20 rows=93 width=20) (actual time=1.205..31.293 rows=82 loops=1)
+  Hash Cond: (oi.order_id = o.order_id)
+  Buffers: shared hit=1871
+  ->  Seq Scan on order_items oi  (cost=0.00..4344.49 rows=250349 width=12) (actual time=0.003..14.542 rows=250349 loops=1)
+        Buffers: shared hit=1841
+  ->  Hash  (cost=137.05..137.05 rows=37 width=12) (actual time=0.049..0.052 rows=28 loops=1)
+        Buckets: 1024  Batches: 1  Memory Usage: 10kB
+        Buffers: shared hit=30
+        ->  Bitmap Heap Scan on orders o  (cost=4.70..137.05 rows=37 width=12) (actual time=0.019..0.045 rows=28 loops=1)
+              Recheck Cond: (customer_id = 10)
+              Heap Blocks: exact=27
+              Buffers: shared hit=30
+              ->  Bitmap Index Scan on idx_orders_customer_date  (cost=0.00..4.70 rows=37 width=0) (actual time=0.012..0.013 rows=28 loops=1)
+                    Index Cond: (customer_id = 10)
+                    Buffers: shared hit=3
+Planning Time: 0.162 ms
+Execution Time: 31.322 ms
+

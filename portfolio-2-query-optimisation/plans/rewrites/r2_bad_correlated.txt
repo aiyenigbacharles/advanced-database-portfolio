@@ -1,0 +1,34 @@
+Rewrite 2, BAD: correlated subquery
+
+SELECT o.order_id, o.customer_id, o.total_amount
+FROM orders o
+WHERE o.total_amount > (SELECT AVG(o2.total_amount)
+                        FROM orders o2
+                        WHERE o2.customer_id = o.customer_id);
+
+All 3 runs (ms): 826.021, 825.636, 977.384
+Median execution time: 826.021 ms
+
+Seq Scan on orders o  (cost=0.00..2377292.10 rows=33333 width=14) (actual time=98.338..809.491 rows=38765 loops=1)
+  Filter: (total_amount > (SubPlan 1))
+  Rows Removed by Filter: 61235
+  Buffers: shared hit=838452 read=384
+  SubPlan 1
+    ->  Aggregate  (cost=23.73..23.74 rows=1 width=32) (actual time=0.007..0.007 rows=1 loops=100000)
+          Buffers: shared hit=836698 read=384
+          ->  Bitmap Heap Scan on orders o2  (cost=4.46..23.72 rows=5 width=6) (actual time=0.003..0.005 rows=5 loops=100000)
+                Recheck Cond: (customer_id = o.customer_id)
+                Heap Blocks: exact=535455
+                Buffers: shared hit=836698 read=384
+                ->  Bitmap Index Scan on idx_orders_customer_date  (cost=0.00..4.46 rows=5 width=0) (actual time=0.002..0.002 rows=5 loops=100000)
+                      Index Cond: (customer_id = o.customer_id)
+                      Buffers: shared hit=301243 read=384
+Planning:
+  Buffers: shared hit=6
+Planning Time: 0.108 ms
+JIT:
+  Functions: 12
+  Options: Inlining true, Optimization true, Expressions true, Deforming true
+  Timing: Generation 0.346 ms, Inlining 46.679 ms, Optimization 28.927 ms, Emission 22.335 ms, Total 98.287 ms
+Execution Time: 826.021 ms
+

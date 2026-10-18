@@ -68,6 +68,19 @@ ANALYZE customer_addresses;
 -- future". Delivery needs up to about 5.6 days after the order, so DELIVERED
 -- needs an order at least 7 days old, SHIPPED at least 2 days old.
 -- Some old orders stay PENDING on purpose (orders stuck in pending is a report).
+-- All the random numbers for step 8 are drawn FIRST, in order_id order, into
+-- their own table. If they were drawn inside the big join below, the planner
+-- could hand them out in a different order depending on table statistics, and
+-- the "repeatable" data would change from run to run.
+CREATE TEMP TABLE stg_draws AS
+SELECT g AS order_id,
+       -- some customers order far more often than others
+       1 + floor((SELECT count(*) FROM customers) * power(random(), 1.3))::int AS customer_id,
+       random() AS r_date, random() AS r_addr, random() AS r_status,
+       random() AS r_items, random() AS r_flow
+FROM generate_series(1, :order_count) AS g
+ORDER BY g;
+
 CREATE TEMP TABLE stg_orders AS
 SELECT d.order_id, d.customer_id, d.address_id, d.order_date, d.order_age_days,
        CASE
@@ -106,15 +119,7 @@ FROM (
                -- after registration, never after "today"; power 0.5 favours recent dates
                c.registered_at + power(b.r_date, 0.5) * (k2.as_of - c.registered_at) AS order_date,
                b.r_status, b.r_items, b.r_flow
-        FROM (
-            SELECT g AS order_id,
-                   -- some customers order far more often than others
-                   1 + floor(cc.n * power(random(), 1.3))::int AS customer_id,
-                   random() AS r_date, random() AS r_addr, random() AS r_status,
-                   random() AS r_items, random() AS r_flow
-            FROM generate_series(1, :order_count) AS g
-            CROSS JOIN (SELECT count(*) AS n FROM customers) cc
-        ) b
+        FROM stg_draws b
         JOIN customers c ON c.customer_id = b.customer_id
         JOIN customer_addresses ca ON ca.customer_id = b.customer_id
         CROSS JOIN seed_clock k2
@@ -170,6 +175,7 @@ FROM (
     FROM stg_orders o
     CROSS JOIN LATERAL generate_series(1, o.n_items) AS gs(k)
     CROSS JOIN (SELECT count(*) AS n FROM products) pc
+    ORDER BY o.order_id, gs.k   -- fixes the order the random numbers are handed out in
 ) x
 JOIN products   p ON p.product_id  = x.product_id
 JOIN categories c ON c.category_id = p.category_id
@@ -214,6 +220,7 @@ WITH l1 AS (
         FROM (SELECT DISTINCT order_id, seller_id FROM stg_items) q
     ) p
     JOIN stg_orders o ON o.order_id = p.order_id
+    ORDER BY p.order_id, p.seller_id   -- fixes the order the random numbers are handed out in
 ),
 l2 AS (
     SELECT l1.*,

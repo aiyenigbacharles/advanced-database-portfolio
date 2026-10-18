@@ -1,0 +1,29 @@
+J2: item revenue for every order in the last 90 days (a LARGE join: about 52,000 orders) - the planner's own choice
+
+SELECT COUNT(*) AS items, SUM(oi.unit_price * oi.quantity) AS revenue
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.order_id
+WHERE o.order_date >= TIMESTAMPTZ '2026-10-15' - INTERVAL '90 days';
+
+All 3 runs (ms): 110.801, 97.605, 132.693
+Median execution time: 110.801 ms
+
+Aggregate  (cost=10194.59..10194.60 rows=1 width=40) (actual time=110.765..110.768 rows=1 loops=1)
+  Buffers: shared hit=3595
+  ->  Hash Join  (cost=3899.70..8901.39 rows=129320 width=10) (actual time=22.347..83.055 rows=129059 loops=1)
+        Hash Cond: (oi.order_id = o.order_id)
+        Buffers: shared hit=3595
+        ->  Seq Scan on order_items oi  (cost=0.00..4344.49 rows=250349 width=14) (actual time=0.003..17.372 rows=250349 loops=1)
+              Buffers: shared hit=1841
+        ->  Hash  (cost=3254.00..3254.00 rows=51656 width=4) (actual time=22.274..22.276 rows=51637 loops=1)
+              Buckets: 65536  Batches: 1  Memory Usage: 2328kB
+              Buffers: shared hit=1754
+              ->  Seq Scan on orders o  (cost=0.00..3254.00 rows=51656 width=4) (actual time=0.327..15.175 rows=51637 loops=1)
+                    Filter: (order_date >= ('2026-10-15 00:00:00+00'::timestamp with time zone - '90 days'::interval))
+                    Rows Removed by Filter: 48363
+                    Buffers: shared hit=1754
+Planning:
+  Buffers: shared hit=17
+Planning Time: 0.180 ms
+Execution Time: 110.801 ms
+

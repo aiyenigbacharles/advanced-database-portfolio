@@ -1,0 +1,12 @@
+Q5 answered by reading the materialised view
+
+SELECT seller_id, month, commission FROM mv_monthly_commission ORDER BY seller_id, month;
+
+All 3 runs (ms): 2.917, 2.224, 2.286
+Median execution time: 2.286 ms
+
+Index Scan using idx_mv_commission_seller_month on mv_monthly_commission  (cost=0.29..547.82 rows=9304 width=19) (actual time=0.003..1.921 rows=9304 loops=1)
+  Buffers: shared hit=9204
+Planning Time: 0.018 ms
+Execution Time: 2.286 ms
+

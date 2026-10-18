@@ -1,0 +1,43 @@
+Q3: List the items one seller sold in the last 30 days (cancelled orders excluded).
+
+SELECT o.order_id, o.order_date, p.name AS product, oi.quantity,
+       oi.unit_price * oi.quantity AS line_total
+FROM order_items oi
+JOIN orders   o ON o.order_id   = oi.order_id
+JOIN products p ON p.product_id = oi.product_id
+WHERE oi.seller_id = 33
+  AND o.order_date >= TIMESTAMPTZ '2026-10-15' - INTERVAL '30 days'
+  AND o.status <> 'CANCELLED'
+ORDER BY o.order_date DESC;
+
+All 3 runs (ms): 2.235, 1.910, 1.793
+Median execution time: 1.910 ms
+
+Sort  (cost=4009.92..4010.16 rows=97 width=70) (actual time=1.880..1.887 rows=117 loops=1)
+  Sort Key: o.order_date DESC
+  Sort Method: quicksort  Memory: 33kB
+  Buffers: shared hit=2869
+  ->  Nested Loop  (cost=12.28..4006.72 rows=97 width=70) (actual time=0.107..1.848 rows=117 loops=1)
+        Buffers: shared hit=2869
+        ->  Nested Loop  (cost=12.00..3831.63 rows=97 width=26) (actual time=0.103..1.687 rows=117 loops=1)
+              Buffers: shared hit=2518
+              ->  Bitmap Heap Scan on order_items oi  (cost=11.58..995.09 rows=408 width=18) (actual time=0.084..0.497 rows=517 loops=1)
+                    Recheck Cond: (seller_id = 33)
+                    Heap Blocks: exact=446
+                    Buffers: shared hit=450
+                    ->  Bitmap Index Scan on idx_order_items_seller_order  (cost=0.00..11.48 rows=408 width=0) (actual time=0.038..0.038 rows=517 loops=1)
+                          Index Cond: (seller_id = 33)
+                          Buffers: shared hit=4
+              ->  Index Scan using orders_pkey on orders o  (cost=0.42..6.95 rows=1 width=12) (actual time=0.002..0.002 rows=0 loops=517)
+                    Index Cond: (order_id = oi.order_id)
+                    Filter: (((status)::text <> 'CANCELLED'::text) AND (order_date >= ('2026-10-15 00:00:00+00'::timestamp with time zone - '30 days'::interval)))
+                    Rows Removed by Filter: 1
+                    Buffers: shared hit=2068
+        ->  Index Scan using uq_products_id_seller on products p  (cost=0.28..1.80 rows=1 width=26) (actual time=0.001..0.001 rows=1 loops=117)
+              Index Cond: (product_id = oi.product_id)
+              Buffers: shared hit=351
+Planning:
+  Buffers: shared hit=23
+Planning Time: 0.265 ms
+Execution Time: 1.910 ms
+

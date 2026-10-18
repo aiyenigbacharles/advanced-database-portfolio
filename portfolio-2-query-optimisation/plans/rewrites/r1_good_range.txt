@@ -1,0 +1,20 @@
+Rewrite 1, GOOD: plain range on the column
+
+SELECT COUNT(*), SUM(total_amount) FROM orders
+WHERE order_date >= TIMESTAMPTZ '2026-10-10' AND order_date < TIMESTAMPTZ '2026-10-11';
+
+All 3 runs (ms): 0.733, 0.585, 0.527
+Median execution time: 0.585 ms
+
+Aggregate  (cost=1594.76..1594.77 rows=1 width=40) (actual time=0.574..0.575 rows=1 loops=1)
+  Buffers: shared hit=626
+  ->  Bitmap Heap Scan on orders  (cost=22.44..1589.80 rows=990 width=6) (actual time=0.156..0.463 rows=1013 loops=1)
+        Recheck Cond: ((order_date >= '2026-10-10 00:00:00+00'::timestamp with time zone) AND (order_date < '2026-10-11 00:00:00+00'::timestamp with time zone))
+        Heap Blocks: exact=622
+        Buffers: shared hit=626
+        ->  Bitmap Index Scan on idx_orders_date_experiment  (cost=0.00..22.19 rows=990 width=0) (actual time=0.092..0.092 rows=1013 loops=1)
+              Index Cond: ((order_date >= '2026-10-10 00:00:00+00'::timestamp with time zone) AND (order_date < '2026-10-11 00:00:00+00'::timestamp with time zone))
+              Buffers: shared hit=4
+Planning Time: 0.038 ms
+Execution Time: 0.585 ms
+

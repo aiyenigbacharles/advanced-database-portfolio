@@ -1,0 +1,45 @@
+Q3: List the items one seller sold in the last 30 days (cancelled orders excluded).
+
+SELECT o.order_id, o.order_date, p.name AS product, oi.quantity,
+       oi.unit_price * oi.quantity AS line_total
+FROM order_items oi
+JOIN orders   o ON o.order_id   = oi.order_id
+JOIN products p ON p.product_id = oi.product_id
+WHERE oi.seller_id = 33
+  AND o.order_date >= TIMESTAMPTZ '2026-10-15' - INTERVAL '30 days'
+  AND o.status <> 'CANCELLED'
+ORDER BY o.order_date DESC;
+
+All 3 runs (ms): 17.345, 17.095, 18.191
+Median execution time: 17.345 ms
+
+Gather Merge  (cost=6460.85..6467.40 rows=57 width=70) (actual time=17.259..17.324 rows=117 loops=1)
+  Workers Planned: 1
+  Workers Launched: 1
+  Buffers: shared hit=4270
+  ->  Sort  (cost=5460.84..5460.98 rows=57 width=70) (actual time=11.973..11.979 rows=58 loops=2)
+        Sort Key: o.order_date DESC
+        Sort Method: quicksort  Memory: 30kB
+        Buffers: shared hit=4270
+        Worker 0:  Sort Method: quicksort  Memory: 28kB
+        ->  Nested Loop  (cost=0.70..5459.18 rows=57 width=70) (actual time=0.179..11.939 rows=58 loops=2)
+              Buffers: shared hit=4262
+              ->  Nested Loop  (cost=0.42..5356.71 rows=57 width=26) (actual time=0.154..11.779 rows=58 loops=2)
+                    Buffers: shared hit=3910
+                    ->  Parallel Seq Scan on order_items oi  (cost=0.00..3681.80 rows=241 width=18) (actual time=0.021..11.134 rows=258 loops=2)
+                          Filter: (seller_id = 33)
+                          Rows Removed by Filter: 124916
+                          Buffers: shared hit=1841
+                    ->  Index Scan using orders_pkey on orders o  (cost=0.42..6.95 rows=1 width=12) (actual time=0.002..0.002 rows=0 loops=517)
+                          Index Cond: (order_id = oi.order_id)
+                          Filter: (((status)::text <> 'CANCELLED'::text) AND (order_date >= ('2026-10-15 00:00:00+00'::timestamp with time zone - '30 days'::interval)))
+                          Rows Removed by Filter: 1
+                          Buffers: shared hit=2069
+              ->  Index Scan using uq_products_id_seller on products p  (cost=0.28..1.79 rows=1 width=26) (actual time=0.002..0.002 rows=1 loops=117)
+                    Index Cond: (product_id = oi.product_id)
+                    Buffers: shared hit=352
+Planning:
+  Buffers: shared hit=81
+Planning Time: 0.325 ms
+Execution Time: 17.345 ms
+

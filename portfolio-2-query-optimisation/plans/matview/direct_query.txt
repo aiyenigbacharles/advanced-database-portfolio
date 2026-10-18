@@ -1,0 +1,38 @@
+Q5 run directly against the tables
+
+SELECT oi.seller_id,
+       DATE_TRUNC('month', o.order_date) AS month,
+       ROUND(SUM(oi.unit_price * oi.quantity * oi.commission_rate), 2) AS commission
+FROM order_items oi
+JOIN orders o ON o.order_id = oi.order_id
+WHERE o.status = 'DELIVERED'
+GROUP BY oi.seller_id, DATE_TRUNC('month', o.order_date)
+ORDER BY oi.seller_id, month;
+
+All 3 runs (ms): 346.697, 305.533, 291.349
+Median execution time: 305.533 ms
+
+GroupAggregate  (cost=34298.95..41959.51 rows=218873 width=44) (actual time=195.444..304.317 rows=9304 loops=1)
+  Group Key: oi.seller_id, (date_trunc('month'::text, o.order_date))
+  Buffers: shared hit=3595, temp read=1152 written=1156
+  ->  Sort  (cost=34298.95..34846.14 rows=218873 width=27) (actual time=195.425..221.117 rows=218578 loops=1)
+        Sort Key: oi.seller_id, (date_trunc('month'::text, o.order_date))
+        Sort Method: external merge  Disk: 9216kB
+        Buffers: shared hit=3595, temp read=1152 written=1156
+        ->  Hash Join  (cost=4096.84..9645.71 rows=218873 width=27) (actual time=27.780..125.315 rows=218578 loops=1)
+              Hash Cond: (oi.order_id = o.order_id)
+              Buffers: shared hit=3595
+              ->  Seq Scan on order_items oi  (cost=0.00..4344.49 rows=250349 width=23) (actual time=0.004..15.892 rows=250349 loops=1)
+                    Buffers: shared hit=1841
+              ->  Hash  (cost=3004.00..3004.00 rows=87427 width=12) (actual time=27.667..27.669 rows=87228 loops=1)
+                    Buckets: 131072  Batches: 1  Memory Usage: 4773kB
+                    Buffers: shared hit=1754
+                    ->  Seq Scan on orders o  (cost=0.00..3004.00 rows=87427 width=12) (actual time=1.171..14.997 rows=87228 loops=1)
+                          Filter: ((status)::text = 'DELIVERED'::text)
+                          Rows Removed by Filter: 12772
+                          Buffers: shared hit=1754
+Planning:
+  Buffers: shared hit=17
+Planning Time: 0.219 ms
+Execution Time: 305.533 ms
+

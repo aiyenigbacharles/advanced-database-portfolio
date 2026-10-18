@@ -1,0 +1,8 @@
+qno,median_ms,scans,buffers
+1,0.037,Bitmap Heap Scan on orders; Bitmap Index Scan on idx_orders_customer_date,30
+2,2.275,Bitmap Heap Scan on orders; Bitmap Index Scan on idx_orders_pending_date,883
+3,1.910,Bitmap Heap Scan on order_items; Bitmap Index Scan on idx_order_items_seller_order; Index Scan [orders_pkey] on orders; Index Scan [uq_products_id_seller] on products,2869
+4,151.973,Parallel Seq Scan on order_items; Parallel Seq Scan on orders; Seq Scan on products,3859
+5,284.065,Seq Scan on order_items; Seq Scan on orders,4747
+6,1.014,Index Only Scan [idx_deliveries_failed_rider] on deliveries; Seq Scan on riders,10
+7,0.014,Bitmap Heap Scan on wallet_transactions; Bitmap Index Scan on idx_wallet_customer_date,7

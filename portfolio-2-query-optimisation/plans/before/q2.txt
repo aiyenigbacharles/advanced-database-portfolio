@@ -1,0 +1,22 @@
+Q2: Find orders that have been PENDING for more than 2 days.
+
+SELECT order_id, customer_id, order_date, total_amount
+FROM orders
+WHERE status = 'PENDING'
+  AND order_date < TIMESTAMPTZ '2026-10-15' - INTERVAL '2 days'
+ORDER BY order_date;
+
+All 3 runs (ms): 6.100, 5.649, 5.657
+Median execution time: 5.657 ms
+
+Sort  (cost=3705.15..3713.71 rows=3426 width=22) (actual time=5.435..5.557 rows=2568 loops=1)
+  Sort Key: order_date
+  Sort Method: quicksort  Memory: 217kB
+  Buffers: shared hit=1754
+  ->  Seq Scan on orders  (cost=0.00..3504.00 rows=3426 width=22) (actual time=0.124..5.008 rows=2568 loops=1)
+        Filter: (((status)::text = 'PENDING'::text) AND (order_date < ('2026-10-15 00:00:00+00'::timestamp with time zone - '2 days'::interval)))
+        Rows Removed by Filter: 97432
+        Buffers: shared hit=1754
+Planning Time: 0.032 ms
+Execution Time: 5.657 ms
+

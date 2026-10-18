@@ -1,0 +1,53 @@
+Q6: Find the riders with the most FAILED deliveries.
+
+SELECT r.rider_id, r.full_name, COUNT(*) AS failed_deliveries
+FROM deliveries d
+JOIN riders r ON r.rider_id = d.rider_id
+WHERE d.status = 'FAILED'
+GROUP BY r.rider_id, r.full_name
+ORDER BY failed_deliveries DESC
+LIMIT 10;
+
+All 3 runs (ms): 20.094, 19.463, 18.935
+Median execution time: 19.463 ms
+
+Limit  (cost=5697.72..5697.75 rows=10 width=25) (actual time=19.388..19.433 rows=10 loops=1)
+  Buffers: shared hit=2795
+  ->  Sort  (cost=5697.72..5698.47 rows=300 width=25) (actual time=19.386..19.430 rows=10 loops=1)
+        Sort Key: (count(*)) DESC
+        Sort Method: top-N heapsort  Memory: 26kB
+        Buffers: shared hit=2795
+        ->  Finalize GroupAggregate  (cost=5652.24..5691.24 rows=300 width=25) (actual time=19.167..19.379 rows=300 loops=1)
+              Group Key: r.rider_id
+              Buffers: shared hit=2795
+              ->  Gather Merge  (cost=5652.24..5686.74 rows=300 width=25) (actual time=19.160..19.287 rows=591 loops=1)
+                    Workers Planned: 1
+                    Workers Launched: 1
+                    Buffers: shared hit=2795
+                    ->  Sort  (cost=4652.23..4652.98 rows=300 width=25) (actual time=15.253..15.275 rows=296 loops=2)
+                          Sort Key: r.rider_id
+                          Sort Method: quicksort  Memory: 40kB
+                          Buffers: shared hit=2795
+                          Worker 0:  Sort Method: quicksort  Memory: 40kB
+                          ->  Partial HashAggregate  (cost=4636.89..4639.89 rows=300 width=25) (actual time=15.160..15.190 rows=296 loops=2)
+                                Group Key: r.rider_id
+                                Batches: 1  Memory Usage: 61kB
+                                Buffers: shared hit=2788
+                                Worker 0:  Batches: 1  Memory Usage: 61kB
+                                ->  Hash Join  (cost=10.75..4627.98 rows=1782 width=17) (actual time=0.082..14.872 rows=1536 loops=2)
+                                      Hash Cond: (d.rider_id = r.rider_id)
+                                      Buffers: shared hit=2788
+                                      ->  Parallel Seq Scan on deliveries d  (cost=0.00..4612.49 rows=1782 width=4) (actual time=0.008..14.537 rows=1536 loops=2)
+                                            Filter: ((status)::text = 'FAILED'::text)
+                                            Rows Removed by Filter: 123278
+                                            Buffers: shared hit=2777
+                                      ->  Hash  (cost=7.00..7.00 rows=300 width=17) (actual time=0.063..0.063 rows=300 loops=2)
+                                            Buckets: 1024  Batches: 1  Memory Usage: 23kB
+                                            Buffers: shared hit=8
+                                            ->  Seq Scan on riders r  (cost=0.00..7.00 rows=300 width=17) (actual time=0.005..0.027 rows=300 loops=2)
+                                                  Buffers: shared hit=8
+Planning:
+  Buffers: shared hit=7
+Planning Time: 0.198 ms
+Execution Time: 19.463 ms
+

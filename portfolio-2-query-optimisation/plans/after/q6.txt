@@ -1,0 +1,39 @@
+Q6: Find the riders with the most FAILED deliveries.
+
+SELECT r.rider_id, r.full_name, COUNT(*) AS failed_deliveries
+FROM deliveries d
+JOIN riders r ON r.rider_id = d.rider_id
+WHERE d.status = 'FAILED'
+GROUP BY r.rider_id, r.full_name
+ORDER BY failed_deliveries DESC
+LIMIT 10;
+
+All 3 runs (ms): 1.098, 1.014, 1.001
+Median execution time: 1.014 ms
+
+Limit  (cost=112.19..112.22 rows=10 width=25) (actual time=0.996..0.998 rows=10 loops=1)
+  Buffers: shared hit=10
+  ->  Sort  (cost=112.19..112.94 rows=300 width=25) (actual time=0.996..0.997 rows=10 loops=1)
+        Sort Key: (count(*)) DESC
+        Sort Method: top-N heapsort  Memory: 25kB
+        Buffers: shared hit=10
+        ->  HashAggregate  (cost=102.71..105.71 rows=300 width=25) (actual time=0.937..0.962 rows=300 loops=1)
+              Group Key: r.rider_id
+              Batches: 1  Memory Usage: 61kB
+              Buffers: shared hit=10
+              ->  Hash Join  (cost=11.03..87.78 rows=2987 width=17) (actual time=0.057..0.611 rows=3072 loops=1)
+                    Hash Cond: (d.rider_id = r.rider_id)
+                    Buffers: shared hit=10
+                    ->  Index Only Scan using idx_deliveries_failed_rider on deliveries d  (cost=0.28..69.09 rows=2987 width=4) (actual time=0.005..0.176 rows=3072 loops=1)
+                          Heap Fetches: 0
+                          Buffers: shared hit=6
+                    ->  Hash  (cost=7.00..7.00 rows=300 width=17) (actual time=0.051..0.051 rows=300 loops=1)
+                          Buckets: 1024  Batches: 1  Memory Usage: 23kB
+                          Buffers: shared hit=4
+                          ->  Seq Scan on riders r  (cost=0.00..7.00 rows=300 width=17) (actual time=0.002..0.022 rows=300 loops=1)
+                                Buffers: shared hit=4
+Planning:
+  Buffers: shared hit=7
+Planning Time: 0.124 ms
+Execution Time: 1.014 ms
+

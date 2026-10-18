@@ -1,0 +1,26 @@
+J2: item revenue for every order in the last 90 days (a LARGE join: about 52,000 orders) - forced Merge Join
+
+SELECT COUNT(*) AS items, SUM(oi.unit_price * oi.quantity) AS revenue
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.order_id
+WHERE o.order_date >= TIMESTAMPTZ '2026-10-15' - INTERVAL '90 days';
+
+All 3 runs (ms): 125.395, 102.991, 109.144
+Median execution time: 109.144 ms
+
+Aggregate  (cost=20073.26..20073.27 rows=1 width=40) (actual time=109.116..109.117 rows=1 loops=1)
+  Buffers: shared hit=4075
+  ->  Merge Join  (cost=1.07..18780.06 rows=129320 width=10) (actual time=0.009..80.903 rows=129059 loops=1)
+        Merge Cond: (o.order_id = oi.order_id)
+        Buffers: shared hit=4075
+        ->  Index Scan using orders_pkey on orders o  (cost=0.42..5961.43 rows=51656 width=4) (actual time=0.004..21.540 rows=51637 loops=1)
+              Filter: (order_date >= ('2026-10-15 00:00:00+00'::timestamp with time zone - '90 days'::interval))
+              Rows Removed by Filter: 48363
+              Buffers: shared hit=1547
+        ->  Index Scan using uq_order_items_order_product on order_items oi  (cost=0.42..10770.65 rows=250349 width=14) (actual time=0.003..27.221 rows=250349 loops=1)
+              Buffers: shared hit=2528
+Planning:
+  Buffers: shared hit=17
+Planning Time: 0.195 ms
+Execution Time: 109.144 ms
+

@@ -1,0 +1,25 @@
+J1: one customer's orders with their items (a SMALL join: 28 orders) - forced Nested Loop
+
+SELECT o.order_id, o.order_date, oi.product_id, oi.quantity
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.order_id
+WHERE o.customer_id = 10;
+
+All 3 runs (ms): 0.106, 0.117, 0.072
+Median execution time: 0.106 ms
+
+Nested Loop  (cost=5.12..575.89 rows=93 width=20) (actual time=0.016..0.093 rows=82 loops=1)
+  Buffers: shared hit=142
+  ->  Bitmap Heap Scan on orders o  (cost=4.70..137.05 rows=37 width=12) (actual time=0.011..0.025 rows=28 loops=1)
+        Recheck Cond: (customer_id = 10)
+        Heap Blocks: exact=27
+        Buffers: shared hit=30
+        ->  Bitmap Index Scan on idx_orders_customer_date  (cost=0.00..4.70 rows=37 width=0) (actual time=0.007..0.007 rows=28 loops=1)
+              Index Cond: (customer_id = 10)
+              Buffers: shared hit=3
+  ->  Index Scan using uq_order_items_order_product on order_items oi  (cost=0.42..11.83 rows=3 width=12) (actual time=0.002..0.002 rows=3 loops=28)
+        Index Cond: (order_id = o.order_id)
+        Buffers: shared hit=112
+Planning Time: 0.062 ms
+Execution Time: 0.106 ms
+

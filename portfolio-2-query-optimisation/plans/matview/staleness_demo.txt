@@ -1,0 +1,25 @@
+BEGIN
+Seller 33, that item's month. The view and the live query agree at first:
+   source   | commission 
+------------+------------
+ view       | 1085915.00
+ live query | 1085915.00
+(2 rows)
+
+UPDATE 1
+After the change, the live query moves but the view is STALE:
+   source   | commission 
+------------+------------
+ view       | 1085915.00
+ live query | 1106460.00
+(2 rows)
+
+REFRESH MATERIALIZED VIEW
+After REFRESH MATERIALIZED VIEW, the view has caught up:
+   source   | commission 
+------------+------------
+ view       | 1106460.00
+ live query | 1106460.00
+(2 rows)
+
+ROLLBACK

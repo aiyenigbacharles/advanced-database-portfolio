@@ -1,0 +1,32 @@
+Rewrite 2, GOOD: aggregate once, then join
+
+SELECT o.order_id, o.customer_id, o.total_amount
+FROM orders o
+JOIN (SELECT customer_id, AVG(total_amount) AS avg_total
+      FROM orders GROUP BY customer_id) a ON a.customer_id = o.customer_id
+WHERE o.total_amount > a.avg_total;
+
+All 3 runs (ms): 98.401, 95.547, 98.472
+Median execution time: 98.401 ms
+
+Hash Join  (cost=3794.25..6810.78 rows=33333 width=14) (actual time=60.300..96.254 rows=38765 loops=1)
+  Hash Cond: (o.customer_id = orders.customer_id)
+  Join Filter: (o.total_amount > (avg(orders.total_amount)))
+  Rows Removed by Join Filter: 61235
+  Buffers: shared hit=3508, temp read=48 written=116
+  ->  Seq Scan on orders o  (cost=0.00..2754.00 rows=100000 width=14) (actual time=0.301..6.743 rows=100000 loops=1)
+        Buffers: shared hit=1754
+  ->  Hash  (cost=3524.12..3524.12 rows=21610 width=36) (actual time=59.863..59.865 rows=24375 loops=1)
+        Buckets: 32768  Batches: 1  Memory Usage: 1324kB
+        Buffers: shared hit=1754, temp read=48 written=116
+        ->  HashAggregate  (cost=3254.00..3524.12 rows=21610 width=36) (actual time=43.564..55.814 rows=24375 loops=1)
+              Group Key: orders.customer_id
+              Batches: 5  Memory Usage: 8241kB  Disk Usage: 672kB
+              Buffers: shared hit=1754, temp read=48 written=116
+              ->  Seq Scan on orders  (cost=0.00..2754.00 rows=100000 width=10) (actual time=0.103..6.724 rows=100000 loops=1)
+                    Buffers: shared hit=1754
+Planning:
+  Buffers: shared hit=3
+Planning Time: 0.163 ms
+Execution Time: 98.401 ms
+

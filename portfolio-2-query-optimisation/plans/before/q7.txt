@@ -1,0 +1,21 @@
+Q7: Show one customer's wallet history, newest first.
+
+SELECT created_at, type, reason, amount, order_id
+FROM wallet_transactions
+WHERE customer_id = 10
+ORDER BY created_at DESC;
+
+All 3 runs (ms): 1.340, 1.242, 1.057
+Median execution time: 1.242 ms
+
+Sort  (cost=613.55..613.58 rows=10 width=31) (actual time=1.234..1.235 rows=10 loops=1)
+  Sort Key: created_at DESC
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=285
+  ->  Seq Scan on wallet_transactions  (cost=0.00..613.39 rows=10 width=31) (actual time=0.050..1.228 rows=10 loops=1)
+        Filter: (customer_id = 10)
+        Rows Removed by Filter: 26261
+        Buffers: shared hit=285
+Planning Time: 0.035 ms
+Execution Time: 1.242 ms
+

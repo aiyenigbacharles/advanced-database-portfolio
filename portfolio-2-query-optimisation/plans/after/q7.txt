@@ -1,0 +1,24 @@
+Q7: Show one customer's wallet history, newest first.
+
+SELECT created_at, type, reason, amount, order_id
+FROM wallet_transactions
+WHERE customer_id = 10
+ORDER BY created_at DESC;
+
+All 3 runs (ms): 0.046, 0.014, 0.010
+Median execution time: 0.014 ms
+
+Sort  (cost=39.04..39.06 rows=10 width=31) (actual time=0.009..0.009 rows=10 loops=1)
+  Sort Key: created_at DESC
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=7
+  ->  Bitmap Heap Scan on wallet_transactions  (cost=4.37..38.87 rows=10 width=31) (actual time=0.004..0.006 rows=10 loops=1)
+        Recheck Cond: (customer_id = 10)
+        Heap Blocks: exact=5
+        Buffers: shared hit=7
+        ->  Bitmap Index Scan on idx_wallet_customer_date  (cost=0.00..4.36 rows=10 width=0) (actual time=0.002..0.002 rows=10 loops=1)
+              Index Cond: (customer_id = 10)
+              Buffers: shared hit=2
+Planning Time: 0.017 ms
+Execution Time: 0.014 ms
+
