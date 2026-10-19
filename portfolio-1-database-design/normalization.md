@@ -26,7 +26,7 @@ Imagine NaijaMart began with a single spreadsheet. Amaka's order (a Tecno phone 
 
 | order_id | order_date | customer_name | customer_email | customer_address             | items                                           | seller_names                 | seller_cities | rider        | payment    |
 | -------- | ---------- | ------------- | -------------- | ---------------------------- | ----------------------------------------------- | ---------------------------- | ------------- | ------------ | ---------- |
-| 1        | 2026-10-01 | Amaka Obi     | amaka@mail.com | 12 Gwarinpa Road, Abuja, FCT | Tecno Spark x1 at 85000; Ofada Rice x1 at 12000 | Lagos Gadgets; Ibadan Grains | Lagos; Ibadan | Ibrahim Sule | CARD 97000 |
+| 1        | 2026-10-01 | Amaka Obi     | amaka@gmail.com | 12 Gwarinpa Road, Abuja, FCT | Tecno Spark x1 at 85000; Ofada Rice x1 at 12000 | Lagos Gadgets; Ibadan Grains | Lagos; Ibadan | Ibrahim Sule | CARD 97000 |
 
 Problems: several items and sellers are crammed into one cell, the address is one block of text, and customer and seller facts repeat for every order.
 
