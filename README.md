@@ -17,4 +17,4 @@ Other files: [`AI-USE.md`](AI-USE.md) is the AI-use declaration for the whole re
 
 ## Tools used
 
-PostgreSQL 18, MongoDB 9.0.4 with mongosh 2.13.0, Redis (Memurai Developer) on Windows. The relational test data is generated with a fixed seed, so every run gives the same data.
+PostgreSQL 18, MongoDB 9.0.4 with mongosh 2.13.0, Redis (Memurai Developer) on Windows 11 26H2 PC. The relational test data is generated with a fixed seed, so every run gives the same data.
