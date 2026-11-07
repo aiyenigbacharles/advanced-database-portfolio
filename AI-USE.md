@@ -3,7 +3,7 @@
 **Course:** MIT 8103 Advanced Database Systems, First Semester Continuous Assessment 2026/2027
 **Student:** Charles Aiyenigba
 **Student ID:** 301911426
-**Date:** 7 November 2026
+**Date:** 7th November 2026
 
 This declaration covers all five portfolios in this repository (section 11 of the assessment brief).
 
@@ -21,7 +21,7 @@ This declaration covers all five portfolios in this repository (section 11 of th
 | 4. NoSQL              | `seed_mongo.js`, `explain_queries.js`, the index scripts, `export_*.sql`, `sync_prices.js`, `redis_cart_demo.md`& `design.md`                                                                       |
 | 5. Distributed        | `design.md`, `README.md` and `commands.md`                                                                                                                                                                 |
 
-Claude also explained concepts to me.
+Claude also explained some concepts to me.
 
 ## 3. What I did myself
 
